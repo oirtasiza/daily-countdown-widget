@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Countdown - Sisa Waktu Hari Ini</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Daily Countdown">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMxYTFhMWEiLz4KPHRleHQgeD0iOTYiIHk9IjExMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjcyIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4o+zPC90ZXh0Pgo8L3N2Zz4K">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .countdown-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .countdown-display {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .time-unit {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 15px;
+            padding: 20px 15px;
+            min-width: 90px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .time-unit:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
+        }
+
+        .time-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+            background: linear-gradient(45deg, #ffffff, #888888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .time-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            margin: 30px 0;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #666666);
+            border-radius: 10px;
+            transition: width 1s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .motivation-text {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-style: italic;
+            opacity: 0.9;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 0.6; }
+        }
+
+        .current-time {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .hourglass {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            animation: rotate 3s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+
+        @media (max-width: 480px) {
+            .countdown-display {
+                gap: 10px;
+            }
+            
+            .time-unit {
+                min-width: 70px;
+                padding: 15px 10px;
+            }
+            
+            .time-number {
+                font-size: 2rem;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="countdown-container">
+        <div class="hourglass">⏳</div>
+        <h1 class="title">Sisa Waktu Hari Ini</h1>
+        <p class="subtitle">Manfaatkan setiap detik yang tersisa!</p>
+        
+        <div class="countdown-display">
+            <div class="time-unit">
+                <span class="time-number" id="hours">23</span>
+                <div class="time-label">Jam</div>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="minutes">59</span>
+                <div class="time-label">Menit</div>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="seconds">59</span>
+                <div class="time-label">Detik</div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="motivation-text" id="motivationText">
+            Waktu terus berjalan, manfaatkan dengan baik! 💪
+        </div>
+
+        <div class="current-time">
+            Waktu sekarang: <span id="currentTime"></span>
+        </div>
+    </div>
+
+    <script>
+        // Array motivasi yang berbeda-beda
+        const motivationMessages = [
+            "Waktu terus berjalan, manfaatkan dengan baik! 💪",
+            "Setiap detik adalah kesempatan baru! ⭐",
+            "Jangan sia-siakan waktu yang tersisa! 🔥",
+            "Produktif itu pilihan, bukan kebetulan! 🚀",
+            "Hari ini tinggal sedikit, maksimalkan! ⚡",
+            "Time is money, gunakan dengan bijak! 💎",
+            "Fokus pada yang penting sekarang! 🎯",
+            "Sisa hari ini masih bisa produktif! 🌟"
+        ];
+
+        let motivationIndex = 0;
+
+        function updateCountdown() {
+            const now = new Date();
+            const midnight = new Date();
+            midnight.setHours(24, 0, 0, 0); // Set ke tengah malam besok
+            
+            const timeLeft = midnight - now;
+            
+            // Hitung jam, menit, detik tersisa
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            // Update display
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            
+            // Update waktu sekarang
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID');
+            
+            // Update progress bar (persentase hari yang sudah berlalu)
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const totalDayMs = 24 * 60 * 60 * 1000;
+            const passedMs = now - startOfDay;
+            const progressPercent = (passedMs / totalDayMs) * 100;
+            
+            document.getElementById('progressBar').style.width = progressPercent + '%';
+            
+            // Ganti motivasi setiap 10 detik
+            if (seconds % 10 === 0) {
+                document.getElementById('motivationText').textContent = motivationMessages[motivationIndex];
+                motivationIndex = (motivationIndex + 1) % motivationMessages.length;
+            }
+            
+            // Jika sudah tengah malam, reset
+            if (timeLeft <= 0) {
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                document.getElementById('motivationText').textContent = '🎉 Hari baru telah tiba! Semangat!';
+            }
+        }
+
+        // Update setiap detik
+        setInterval(updateCountdown, 1000);
+        
+        // Jalankan sekali saat pertama load
+        updateCountdown();
+
+        // PWA Service Worker Registration (only if not in sandbox)
+        if ('serviceWorker' in navigator && !window.location.href.includes('claude.ai')) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registered successfully');
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed');
+                    });
+            });
+
+            // PWA Install Prompt
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show install button/hint
+                const installHint = document.createElement('div');
+                installHint.innerHTML = '📲 Tap untuk install sebagai app!';
+                installHint.style.cssText = 'position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.1);padding:10px;border-radius:10px;cursor:pointer;font-size:12px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);z-index:1000;';
+                document.body.appendChild(installHint);
+                
+                installHint.addEventListener('click', () => {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            installHint.remove();
+                        }
+                    });
+                });
+            });
+        }
+
+        // Easter egg: klik pada jam pasir untuk motivasi random
+        document.querySelector('.hourglass').addEventListener('click', function() {
+            const randomIndex = Math.floor(Math.random() * motivationMessages.length);
+            document.getElementById('motivationText').textContent = motivationMessages[randomIndex];
+            this.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                this.style.transform = 'rotate(0deg)';
+            }, 500);
+        });
+    </script>
+</body>
+</html>
